@@ -1,4 +1,5 @@
-aioredis==2.0.1
+#aioredis==2.0.1
+redis>=4.2
 annotated-types==0.7.0
 anyio==4.8.0
 async-timeout==5.0.1
@@ -15,8 +16,10 @@ exceptiongroup==1.2.2
 Faker==36.1.0
 fastapi==0.115.8
 greenlet==3.1.1
-h11==0.14.0
-httpcore==1.0.7
+#h11==0.14.0
+h11==0.16.0
+#httpcore==1.0.7
+httpcore>=0.13
 httpx==0.28.1
 idna==3.10
 iniconfig==2.0.0
