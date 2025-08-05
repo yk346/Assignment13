@@ -1,6 +1,14 @@
 Docker Hub Repo:
 https://hub.docker.com/repository/docker/yk346/601_module13/general
 
+Frontend link
+http://localhost:8000/dashboard
+
+First time open you will be prompted to a login page.
+Create new user and use login and password to access the calculator.
+Then use accessed calculator webpage to perform calculations.
+
+
 # 📦 Project Setup
 
 ---
