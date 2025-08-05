@@ -216,6 +216,7 @@ def get_calculation(
         raise HTTPException(status_code=404, detail="Calculation not found.")
     return calculation
 
+"""
 # Edit / Update a Calculation
 @app.put("/calculations/{calc_id}", response_model=CalculationResponse, tags=["calculations"])
 def update_calculation(
@@ -241,6 +242,54 @@ def update_calculation(
     calculation.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(calculation)
+    return calculation
+"""
+@app.put("/calculations/{calc_id}", response_model=CalculationResponse, tags=["calculations"])
+def update_calculation(
+    calc_id: str,
+    calculation_update: CalculationUpdate,
+    current_user = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    try:
+        calc_uuid = UUID(calc_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid calculation id format.")
+
+    # Fetch calculation
+    calculation = db.query(Calculation).filter(
+        Calculation.id == calc_uuid,
+        Calculation.user_id == current_user.id
+    ).first()
+
+    if not calculation:
+        raise HTTPException(status_code=404, detail="Calculation not found.")
+
+    # Update fields
+    if calculation_update.type is not None:
+        calculation.type = calculation_update.type
+
+    if calculation_update.inputs is not None:
+        calculation.inputs = calculation_update.inputs
+
+    db.flush()  # Write changes to DB but don't commit yet.
+
+    # Re-fetch to ensure polymorphic identity is refreshed
+    db.expunge(calculation)
+    calculation = db.query(Calculation).get(calc_uuid)
+
+    if not calculation:
+        raise HTTPException(status_code=404, detail="Calculation not found after refresh.")
+
+    try:
+        calculation.result = calculation.get_result()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Calculation failed: {str(e)}")
+
+    calculation.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(calculation)
+
     return calculation
 
 # Delete a Calculation
